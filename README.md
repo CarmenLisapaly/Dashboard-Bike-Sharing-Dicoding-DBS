@@ -11,11 +11,6 @@ This project provides an interactive dashboard for analyzing bike-sharing data. 
     python -m venv venv
     ```
 
-    For macOS/Linux:
-    ```bash
-    python3 -m venv venv
-    ```
-
 2. **Activate the Virtual Environment:**
 
     For Windows:
@@ -23,9 +18,11 @@ This project provides an interactive dashboard for analyzing bike-sharing data. 
     .\venv\Scripts\activate
     ```
 
-    For macOS/Linux:
+3. **Install Libraries:**
+
+    Install the libraries needed to make the dashboard:
     ```bash
-    source venv/bin/activate
+    pip install stremlit matplotlib pandas seaborn
     ```
 
 3. **Install Dependencies:**
@@ -39,7 +36,7 @@ This project provides an interactive dashboard for analyzing bike-sharing data. 
 
     To launch the bike-sharing data analysis dashboard:
     ```bash
-    streamlit run dashboard.py
+    streamlit run dashboard/dashboard.py
     ```
 
 ## Requirements
