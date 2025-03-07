@@ -7,7 +7,7 @@ import seaborn as sns
 st.set_page_config(page_title="Bike Sharing Dashboard", page_icon="🚲", layout="wide")
 
 # Membaca data dari CSV dengan pengecekan keberadaan file
-file_path = 'all_df.csv'
+file_path = 'dashboard/all_df.csv'
 try:
     all_data = pd.read_csv(file_path)
 except FileNotFoundError:
