@@ -26,7 +26,11 @@ else:
     st.stop()
 
 # Hapus nilai NaN pada kolom yang digunakan untuk filtering
-all_data.dropna(subset=['season', 'weathersit'], inplace=True)
+all_data.dropna(subset=['season'], inplace=True)
+
+# Mapping label musim
+season_labels = {1: 'Dingin', 2: 'Panas', 3: 'Semi', 4: 'Gugur'}
+all_data['season'] = all_data['season'].map(season_labels)
 
 # Header Dashboard
 st.title("Bike Sharing Data Analysis Dashboard 🚲")
@@ -55,15 +59,14 @@ page = st.sidebar.radio("Pilih Visualisasi:",
 # Halaman 1: Pola Penggunaan Sepeda Berdasarkan Musim
 if page == "Pola Penggunaan Berdasarkan Musim":
     season_usage = all_data.groupby('season')[cnt_col].mean()
+    season_usage = season_usage.reindex(['Dingin', 'Panas', 'Semi', 'Gugur'])  # Menyesuaikan urutan
     
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(season_usage.index, season_usage.values, color=['#ADD8E6', '#FFD700', '#FF8C00', '#8B4513'])
+    if not season_usage.empty:
+        ax.bar(season_usage.index, season_usage.values, color=['#ADD8E6', '#FFD700', '#FF8C00', '#8B4513'])
     ax.set_title('Pola Penggunaan Sepeda Berdasarkan Musim')
     ax.set_xlabel('Musim')
     ax.set_ylabel('Rata-rata Jumlah Peminjaman')
-    ax.set_xticks(season_usage.index)
-    season_labels = {1: 'Semi', 2: 'Panas', 3: 'Gugur', 4: 'Dingin'}
-    ax.set_xticklabels([season_labels.get(season, str(season)) for season in season_usage.index])
     st.pyplot(fig)
 
 # Halaman 2: Perbedaan Penggunaan Sepeda Antara Hari Kerja dan Hari Libur
