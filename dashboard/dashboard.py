@@ -25,9 +25,20 @@ else:
     st.error("Error: Tidak ada kolom 'cnt', 'cnt_day', atau 'cnt_hour' dalam dataset.")
     st.stop()
 
+# Hapus nilai NaN pada kolom yang digunakan untuk filtering
+all_data.dropna(subset=['season', 'weathersit'], inplace=True)
+
 # Header Dashboard
 st.title("Bike Sharing Data Analysis Dashboard 🚲")
 st.subheader("Exploratory Data Analysis on Bike Sharing Dataset")
+
+# Sidebar Filtering
+st.sidebar.header("Filter Data")
+
+# Filter berdasarkan Musim
+season_options = all_data['season'].dropna().unique().tolist()
+season_filter = st.sidebar.multiselect("Pilih Musim:", season_options, default=season_options)
+all_data = all_data[all_data['season'].isin(season_filter)]
 
 # Menampilkan Data Overview
 st.sidebar.header("Data Overview")
@@ -39,8 +50,7 @@ st.sidebar.title("Navigasi")
 page = st.sidebar.radio("Pilih Visualisasi:", 
     ["Pola Penggunaan Berdasarkan Musim", 
      "Penggunaan Sepeda: Hari Kerja vs Hari Libur", 
-     "Pola Penggunaan Pengguna Kasual", 
-     "Clustering Pengguna Terdaftar"])
+     "Pola Penggunaan Pengguna Kasual"])
 
 # Halaman 1: Pola Penggunaan Sepeda Berdasarkan Musim
 if page == "Pola Penggunaan Berdasarkan Musim":
@@ -52,10 +62,11 @@ if page == "Pola Penggunaan Berdasarkan Musim":
     ax.set_xlabel('Musim')
     ax.set_ylabel('Rata-rata Jumlah Peminjaman')
     ax.set_xticks(season_usage.index)
-    ax.set_xticklabels(['Dingin', 'Panas', 'Semi', 'Gugur'])
+    season_labels = {1: 'Semi', 2: 'Panas', 3: 'Gugur', 4: 'Dingin'}
+    ax.set_xticklabels([season_labels.get(season, str(season)) for season in season_usage.index])
     st.pyplot(fig)
 
-# Halaman 3: Perbedaan Penggunaan Sepeda Antara Hari Kerja dan Hari Libur
+# Halaman 2: Perbedaan Penggunaan Sepeda Antara Hari Kerja dan Hari Libur
 elif page == "Penggunaan Sepeda: Hari Kerja vs Hari Libur":
     if 'workingday' in all_data.columns:
         workday_usage = all_data.groupby('workingday')[cnt_col].mean()
@@ -70,7 +81,7 @@ elif page == "Penggunaan Sepeda: Hari Kerja vs Hari Libur":
     else:
         st.error("Kolom 'workingday' tidak ditemukan dalam dataset.")
 
-# Halaman 4: Pola Penggunaan Sepeda oleh Pengguna Kasual
+# Halaman 3: Pola Penggunaan Sepeda oleh Pengguna Kasual
 elif page == "Pola Penggunaan Pengguna Kasual":
     if 'casual' in all_data.columns and 'hr' in all_data.columns:
         casual_pattern = all_data.groupby('hr')['casual'].mean()
@@ -84,20 +95,3 @@ elif page == "Pola Penggunaan Pengguna Kasual":
         st.pyplot(fig)
     else:
         st.error("Kolom 'casual' atau 'hr' tidak ditemukan dalam dataset.")
-
-# Halaman 5: Clustering Pengguna Terdaftar
-elif page == "Clustering Pengguna Terdaftar":
-    if 'registered' in all_data.columns:
-        registered_bins = [0, 50, 200, all_data['registered'].max()]
-        registered_labels = ['Low', 'Medium', 'High']
-        all_data['registered_cluster'] = pd.cut(all_data['registered'], bins=registered_bins, labels=registered_labels)
-        registered_pattern = all_data.groupby('registered_cluster', observed=True)[cnt_col].mean().reset_index()
-        
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.barplot(x='registered_cluster', y=cnt_col, hue='registered_cluster', data=registered_pattern, palette='viridis', ax=ax, legend=False)
-        ax.set_title('Clustering Pola Penyewaan Pengguna Terdaftar')
-        ax.set_xlabel('Kelompok Pengguna Terdaftar')
-        ax.set_ylabel('Rata-rata Penyewaan')
-        st.pyplot(fig)
-    else:
-        st.error("Kolom 'registered' tidak ditemukan dalam dataset.")
